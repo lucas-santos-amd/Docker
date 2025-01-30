@@ -19,11 +19,13 @@ ENV PIP_ROOT_USER_ACTION=ignore
 ENV TRITON_BUILD_WITH_CCACHE=true
 
 ### CREATE GROUP AND USER
-RUN groupadd -g ${GROUP_ID} ${GROUP_NAME} && \
-    useradd -m -u ${USER_ID} -g ${GROUP_NAME} -s /bin/bash ${USER_NAME} && \
+	RUN if getent group ${GROUP_ID}; then \
+			GROUP_NAME=$(getent group ${GROUP_ID} | cut -d: -f1); \
+		else \
+			groupadd -g ${GROUP_ID} ${GROUP_NAME}; \
+		fi && \
+    useradd -m -u ${USER_ID} -g ${GROUP_ID} -s /bin/bash ${USER_NAME} && \
     echo "${USER_NAME} ALL=(ALL) NOPASSWD: ALL" | tee -a /etc/sudoers > /dev/null
-
-USER ${USER_NAME}
 
 ### apt step:
 COPY apt_requirements.txt /tmp
@@ -44,6 +46,9 @@ COPY deb/rocm6.2_hsa-amd-aqlprofile_1.0.0-local_amd64.deb /tmp
 RUN dpkg --install /tmp/rocm6.2_hsa-amd-aqlprofile_1.0.0-local_amd64.deb && \
     rm --recursive --force /tmp/rocm6.2_hsa-amd-aqlprofile_1.0.0-local_amd64.deb
 
+### Change USER
+USER ${USER_NAME}
+
 ### pip step:
 COPY pip_requirements.txt /tmp
     # Uninstall Triton shipped with PyTorch, we'll compile Triton from source.
@@ -63,11 +68,6 @@ RUN git config --global user.name "${USER_REAL_NAME}" && \
     # Set GitHub SSH hosts as known hosts:
     mkdir --parents --mode 0700 ~/.ssh && \
     ssh-keyscan github.com >> ~/.ssh/known_hosts
-
-# Compile triton:
-RUN git clone https://github.com/triton-lang/triton.git && \
-    cd triton/python/ && \
-    pip install --verbose .
 
 ### Prepare Triton repository and compile it:
 WORKDIR /triton_dev/triton
