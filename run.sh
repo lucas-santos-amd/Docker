@@ -21,6 +21,7 @@ docker run \
     --device /dev/kfd \
     --device /dev/dri \
     --mount "type=bind,source=${HOME},target=/triton_dev/home" \
+    --mount "type=bind,source=${HOME}/triton,target=/triton_dev/triton" \
     --mount "type=bind,source=${HOME}/.ssh,target=/${USER_NAME}/.ssh,readonly" \
     "${IMAGE_NAME}"
  
