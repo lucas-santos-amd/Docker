@@ -69,13 +69,13 @@ RUN git config --global user.name "${USER_REAL_NAME}" && \
     ssh-keyscan github.com >> ~/.ssh/known_hosts
 
 ### Prepare Triton repository and compile it:
-WORKDIR /triton_dev/triton
+WORKDIR /triton_dev/triton_default
     # Clone repository:
 RUN --mount=type=ssh git clone git@github.com:triton-lang/triton.git . && \
     # Add remotes of interest:
     # git remote add rocm git@github.com:ROCm/triton.git && \
-    # git remote add "${USER_NAME}" git@github.com:lucas-santos-amd/triton.git && \
-    # git fetch --all --prune && \
+    git remote add "${USER_NAME}" git@github.com:lucas-santos-amd/triton.git && \
+    git fetch --all --prune && \
     # Checkout branches of interest:
     git checkout main && \
     # Install pre-commit hooks:
@@ -86,7 +86,7 @@ RUN --mount=type=ssh git clone git@github.com:triton-lang/triton.git . && \
     git commit --allow-empty-message --message '' && \
     git reset --hard HEAD~ && \
     # Compile triton
-    cd /triton_dev/triton/python/ && \
+    cd /triton_dev/triton_default/python/ && \
     pip install --verbose .
 
 ### Remove build time SSH stuff:

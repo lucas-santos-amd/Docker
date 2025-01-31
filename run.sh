@@ -12,6 +12,7 @@ if [ -n "${container_name_suffix}" ]; then
     container_name="${container_name}_${container_name_suffix}"
 fi
 
+#FIXME rm is not working
 docker run \
     -it \
     -d \
@@ -22,6 +23,7 @@ docker run \
     --group-add video \
     --group-add render \
     --mount "type=bind,source=${HOME},target=/triton_dev/hhome" \
+    --mount "type=bind,source=${HOME}/triton,target=/triton_dev/triton" \
     --mount "type=bind,source=${HOME}/.ssh,target=/triton_dev/chome/.ssh,readonly" \
-    "${IMAGE_NAME}"
+    "${IMAGE_NAME}" -c "mv /triton_dev/triton_default/{*,.*} /triton_dev/triton/ 2>/dev/null && rm -rf /triton_dev/triton_default/; bash"
  
