@@ -19,13 +19,15 @@ ENV PIP_ROOT_USER_ACTION=ignore
 ENV TRITON_BUILD_WITH_CCACHE=true
 
 ### CREATE GROUP AND USER
-	RUN if getent group ${GROUP_ID}; then \
-			GROUP_NAME=$(getent group ${GROUP_ID} | cut -d: -f1); \
-		else \
-			groupadd -g ${GROUP_ID} ${GROUP_NAME}; \
-		fi && \
-    useradd -m -u ${USER_ID} -g ${GROUP_ID} -s /bin/bash ${USER_NAME} && \
-    echo "${USER_NAME} ALL=(ALL) NOPASSWD: ALL" | tee -a /etc/sudoers > /dev/null
+RUN if getent group ${GROUP_ID}; then \
+        GROUP_NAME=$(getent group ${GROUP_ID} | cut -d: -f1); \
+    else \
+        groupadd -g ${GROUP_ID} ${GROUP_NAME}; \
+    fi && \
+    useradd -m -u ${USER_ID} -g ${GROUP_ID} -s /bin/bash -d /triton_dev/chome ${USER_NAME} && \
+    #FIXME sudo is not working
+    usermod --append --groups sudo,render,video "${USER_NAME}"
+    #echo "${USER_NAME} ALL=(ALL) NOPASSWD: ALL" | tee -a /etc/sudoers > /dev/null
 
 ### apt step:
 COPY apt_requirements.txt /tmp
@@ -45,9 +47,6 @@ RUN apt-get --yes update && \
 COPY deb/rocm6.2_hsa-amd-aqlprofile_1.0.0-local_amd64.deb /tmp
 RUN dpkg --install /tmp/rocm6.2_hsa-amd-aqlprofile_1.0.0-local_amd64.deb && \
     rm --recursive --force /tmp/rocm6.2_hsa-amd-aqlprofile_1.0.0-local_amd64.deb
-
-### Change USER
-USER ${USER_NAME}
 
 ### pip step:
 COPY pip_requirements.txt /tmp
@@ -78,7 +77,7 @@ RUN --mount=type=ssh git clone git@github.com:triton-lang/triton.git . && \
     # git remote add "${USER_NAME}" git@github.com:lucas-santos-amd/triton.git && \
     # git fetch --all --prune && \
     # Checkout branches of interest:
-    # git checkout main && \
+    git checkout main && \
     # Install pre-commit hooks:
     pre-commit install && \
     # Do a "fake commit" to initialize `pre-commit` framework, it takes some
@@ -91,7 +90,13 @@ RUN --mount=type=ssh git clone git@github.com:triton-lang/triton.git . && \
     pip install --verbose .
 
 ### Remove build time SSH stuff:
-RUN rm --recursive --force ~/.ssh
+RUN rm --recursive --force /root/.ssh
+
+### Change USER ownership
+RUN chown -R ${USER_NAME}:${GROUP_ID} /triton_dev /home /opt /usr/local
+
+### Change USER
+USER ${USER_NAME}
 
 ### Expose port for Jupyterlab
 EXPOSE 8888
