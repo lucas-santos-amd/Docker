@@ -1,3 +1,4 @@
 zip
 htop
 ccache
+nano
