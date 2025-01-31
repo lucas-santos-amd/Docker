@@ -16,12 +16,12 @@ docker run \
     -it \
     -d \
     --network host \
-    -p 8888:8888 \
     --name "${container_name}" \
     --device /dev/kfd \
     --device /dev/dri \
-    --mount "type=bind,source=${HOME},target=/triton_dev/home" \
-    --mount "type=bind,source=${HOME}/triton,target=/triton_dev/triton" \
-    --mount "type=bind,source=${HOME}/.ssh,target=/${USER_NAME}/.ssh,readonly" \
+    --group-add video \
+    --group-add render \
+    --mount "type=bind,source=${HOME},target=/triton_dev/hhome" \
+    --mount "type=bind,source=${HOME}/.ssh,target=/triton_dev/chome/.ssh,readonly" \
     "${IMAGE_NAME}"
  
