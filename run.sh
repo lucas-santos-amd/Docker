@@ -12,7 +12,17 @@ if [ -n "${container_name_suffix}" ]; then
     container_name="${container_name}_${container_name_suffix}"
 fi
 
-#FIXME rm is not working
+# Remove older files
+rm -rf ${HOME}/triton/{*,.*} 2>/dev/null
+rm -rf ${HOME}/aiter/{*,.*} 2>/dev/null
+
+# Run after mount
+bash_command="mv /triton_dev/triton_default/{*,.*} /triton_dev/triton/ 2>/dev/null; "
+bash_command+="mv /triton_dev/aiter_default/{*,.*} /triton_dev/aiter/ 2>/dev/null; "
+bash_command+="rm -rf /triton_dev/triton_default/ 2>/dev/null; "
+bash_command+="rm -rf /triton_dev/aiter_default/ 2>/dev/null; "
+bash_command+="bash"
+
 docker run \
     -it \
     -d \
@@ -24,6 +34,8 @@ docker run \
     --group-add render \
     --mount "type=bind,source=${HOME},target=/triton_dev/hhome" \
     --mount "type=bind,source=${HOME}/triton,target=/triton_dev/triton" \
+    --mount "type=bind,source=${HOME}/aiter,target=/triton_dev/aiter" \
     --mount "type=bind,source=${HOME}/.ssh,target=/triton_dev/chome/.ssh,readonly" \
-    "${IMAGE_NAME}" -c "mv /triton_dev/triton_default/{*,.*} /triton_dev/triton/ 2>/dev/null && rm -rf /triton_dev/triton_default/; bash"
+    "${IMAGE_NAME}" -c "${bash_command}"
+
  
