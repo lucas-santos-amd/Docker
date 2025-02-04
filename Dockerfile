@@ -64,6 +64,7 @@ RUN pip uninstall --yes triton && \
 ### Configure Git:
 RUN git config --global user.name "${USER_REAL_NAME}" && \
     git config --global user.email "${USER_EMAIL}" && \
+    cp ~/.gitconfig /triton_dev/chome/ && \
     # Set GitHub SSH hosts as known hosts:
     mkdir --parents --mode 0700 ~/.ssh && \
     ssh-keyscan github.com >> ~/.ssh/known_hosts
