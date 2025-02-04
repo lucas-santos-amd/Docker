@@ -90,6 +90,25 @@ RUN --mount=type=ssh git clone git@github.com:triton-lang/triton.git . && \
     cd /triton_dev/triton_default/python/ && \
     pip install --verbose .
 
+#FIXME pre-commit and setup.py not working
+### Prepare AITER repository and install it
+WORKDIR /triton_dev/aiter_default
+RUN --mount=type=ssh git clone --recursive git@github.com:lucas-santos-amd/aiter.git . && \
+    # Add remotes of interest:
+    git remote add upstream git@github.com:ROCm/aiter.git && \
+    git fetch --all --prune && \
+    # Checkout branches of interest:
+    git checkout main
+    # Install pre-commit hooks:
+    #pre-commit install && \
+    # Do a "fake commit" to initialize `pre-commit` framework, it takes some
+    # time and it's an annoying process...
+    #git add $(mktemp --tmpdir=.) && \
+    #git commit --allow-empty-message --message '' && \
+    #git reset --hard HEAD~ && \
+    # Install into python:
+    #python3 setup.py develop
+
 ### Remove build time SSH stuff:
 RUN rm --recursive --force /root/.ssh
 
