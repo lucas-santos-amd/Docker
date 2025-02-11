@@ -2,3 +2,5 @@ zip
 htop
 ccache
 nano
+black
+clang-format
