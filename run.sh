@@ -31,7 +31,6 @@ docker run \
     --device /dev/kfd \
     --device /dev/dri \
     --group-add video \
-    --group-add render \
     --mount "type=bind,source=${HOME},target=/triton_dev/hhome" \
     --mount "type=bind,source=${HOME}/triton,target=/triton_dev/triton" \
     --mount "type=bind,source=${HOME}/aiter,target=/triton_dev/aiter" \

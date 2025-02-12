@@ -27,7 +27,7 @@ RUN if getent group ${GROUP_ID}; then \
     fi && \
     useradd -m -u ${USER_ID} -g ${GROUP_ID} -s /bin/bash -d /triton_dev/chome ${USER_NAME} && \
     #FIXME sudo is not working
-    usermod --append --groups sudo,render,video "${USER_NAME}"
+    usermod --append --groups sudo,video "${USER_NAME}"
     #echo "${USER_NAME} ALL=(ALL) NOPASSWD: ALL" | tee -a /etc/sudoers > /dev/null
 
 ### apt step:
