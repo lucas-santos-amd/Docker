@@ -1,4 +1,3 @@
-# Use a imagem base com Python
 FROM rocm/pytorch:rocm6.3.2_ubuntu24.04_py3.12_pytorch_release_2.4.0
 
 ### Build time variables:
@@ -26,9 +25,7 @@ RUN if getent group ${GROUP_ID}; then \
         groupadd -g ${GROUP_ID} ${GROUP_NAME}; \
     fi && \
     useradd -m -u ${USER_ID} -g ${GROUP_ID} -s /bin/bash -d /triton_dev/chome ${USER_NAME} && \
-    #FIXME sudo is not working
-    usermod --append --groups sudo,video "${USER_NAME}"
-    #echo "${USER_NAME} ALL=(ALL) NOPASSWD: ALL" | tee -a /etc/sudoers > /dev/null
+    usermod --append --groups video "${USER_NAME}"
 
 ### apt step:
 COPY apt_requirements.txt /tmp
@@ -65,7 +62,8 @@ RUN pip uninstall --yes triton && \
 ### Configure Git:
 RUN git config --global user.name "${USER_REAL_NAME}" && \
     git config --global user.email "${USER_EMAIL}" && \
-    cp ~/.gitconfig /triton_dev/chome/ && \
+    git config --global --add safe.directory '*' && \
+    # cp ~/.gitconfig /triton_dev/chome/ && \
     # Set GitHub SSH hosts as known hosts:
     mkdir --parents --mode 0700 ~/.ssh && \
     ssh-keyscan github.com >> ~/.ssh/known_hosts
@@ -104,19 +102,16 @@ RUN --mount=type=ssh git clone --recursive git@github.com:lucas-santos-amd/aiter
     chmod +x .githooks/install && \
     ./.githooks/install
     # Install into python:
-    #python3 setup.py develop
+    # python setup.py develop
 
 ### Remove build time SSH stuff:
 RUN rm --recursive --force /root/.ssh
 
 ### Change USER ownership
-RUN chown -R ${USER_NAME}:${GROUP_ID} /triton_dev /home /opt /usr/local
+RUN chown -R ${USER_NAME}:${GROUP_ID} /triton_dev
 
 ### Change USER
-USER ${USER_NAME}
-
-### Expose port for Jupyterlab
-EXPOSE 8888
+# USER ${USER_NAME}
 
 ### Entrypoint
 WORKDIR /triton_dev
